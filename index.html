@@ -152,6 +152,16 @@
       80% { transform: translateX(4px); }
     }
     .shake { animation: shake 420ms ease; }
+
+    select.btn {
+      appearance: none;
+      padding-right: 32px;
+      background-image: linear-gradient(45deg, transparent 50%, white 50%),
+      linear-gradient(135deg, white 50%, transparent 50%);
+      background-position: calc(100% - 16px) 18px, calc(100% - 11px) 18px;
+      background-size: 5px 5px, 5px 5px;
+      background-repeat: no-repeat;
+    }
   </style>
 </head>
 
@@ -160,7 +170,14 @@
   <div class="timer" aria-label="Timer">
     <span class="label">Timer</span>
     <span class="value" id="timerValue">30s</span>
+
   </div>
+  <select id="timerSelect" class="btn" aria-label="Timer Dauer">
+    <option value="30">30s</option>
+    <option value="60">60s</option>
+    <option value="120">120s</option>
+  </select>
+
   <button class="btn" id="timerReset">Fertig</button>
 </div>
 
@@ -208,15 +225,21 @@
   // Timer Elements
   const timerValueEl = document.getElementById("timerValue");
   const timerResetEl = document.getElementById("timerReset");
+  const timerSelectEl = document.getElementById("timerSelect");
 
 
   // ===== Timer Logik =====
-  const TIMER_START_SECONDS = 30;
+  let TIMER_START_SECONDS = 30;
   let remaining = TIMER_START_SECONDS;
   let timerId = null;
   let timerRunning = false;
 
   timerValueEl.textContent = `${TIMER_START_SECONDS}s`;
+
+  timerSelectEl.addEventListener("change", () => {
+    TIMER_START_SECONDS = Number(timerSelectEl.value);
+    resetTimer(); // setzt Timer + leert Leinwand + entsperrt
+  });
 
 
   // Sperre wenn Zeit abgelaufen
