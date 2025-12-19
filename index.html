@@ -3,117 +3,165 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Mobile Zeichnen</title>
+  <title>Tour de Chambre</title>
+  <link rel="icon" href="favicon.svg" />
   <style>
     :root { color-scheme: light dark; }
     * { box-sizing: border-box; }
     html, body { height: 100%; margin: 0; }
-    body {
+    body{
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      background: #111;
-      color: #fff;
-      overscroll-behavior: none;
-      touch-action: none; /* wichtig fürs Zeichnen */
+      display:flex; flex-direction:column;
+      background:#111; color:#fff;
+      overscroll-behavior:none;
+      touch-action:none;
     }
 
-    .toolbar {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      padding: 12px;
-      padding-top: calc(12px + env(safe-area-inset-top));
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      background: rgba(0,0,0,0.75);
+    .topbar{
+      position:sticky; top:0; z-index:30;
+      padding:12px; padding-top:calc(12px + env(safe-area-inset-top));
+      display:flex; gap:10px; align-items:center; justify-content:space-between;
+      background:rgba(0,0,0,0.85);
       backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      border-bottom:1px solid rgba(255,255,255,0.12);
+    }
+    .timer{ display:flex; align-items:baseline; gap:10px; font-weight:800; letter-spacing:.3px; }
+    .timer .label{ opacity:.8; font-weight:700; }
+    .timer .value{ font-size:22px; }
+
+    #timerReset{
+      padding: 12px 12px;
     }
 
-    .toolbar > * { height: 42px; }
-    .btn {
-      border: 1px solid rgba(255,255,255,0.2);
-      background: rgba(255,255,255,0.08);
-      color: #fff;
-      padding: 0 14px;
-      border-radius: 12px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .btn:active { transform: scale(0.98); }
-
-    .color {
-      width: 52px;
-      padding: 0;
-      border: 1px solid rgba(255,255,255,0.2);
-      background: transparent;
-      border-radius: 12px;
-      overflow: hidden;
-    }
-    input[type="color"] {
-      width: 100%;
-      height: 100%;
-      border: none;
-      padding: 0;
-      background: transparent;
+    #lockOverlay {
+      border: 1px solid red;
     }
 
-    .range {
-      flex: 1;
-      min-width: 120px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 0 12px;
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 12px;
-      background: rgba(255,255,255,0.06);
+    .toolbar{
+      position:sticky; top:62px; z-index:20;
+      padding:12px;
+      display:flex; gap:10px; align-items:center;
+      background:rgba(0,0,0,0.75);
+      backdrop-filter: blur(10px);
+      border-bottom:1px solid rgba(255,255,255,0.1);
     }
-    .range label { font-size: 12px; opacity: 0.85; white-space: nowrap; }
-    input[type="range"] { width: 100%; }
+    .toolbar > *{ height:42px; }
 
-    .wrap {
-      flex: 1;
-      padding: 12px;
-      padding-bottom: calc(12px + env(safe-area-inset-bottom));
-      display: flex;
-    }
-
-    .board {
-      flex: 1;
-      background: #fff;
-      border-radius: 18px;
-      overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-      border: 1px solid rgba(255,255,255,0.08);
-      position: relative;
+    .btn{
+      border:1px solid rgba(255,255,255,0.2);
+      background:rgba(255,255,255,0.08);
+      color:#fff;
+      padding:0 14px;
+      border-radius:12px;
+      font-weight:700;
+      cursor:pointer;
+      white-space:nowrap;
     }
 
-    canvas {
-      width: 100%;
-      height: 100%;
-      display: block;
-      touch-action: none;
+    .btn:active{ transform:scale(0.98); }
+
+    .color{
+      width:52px; padding:0;
+      border:1px solid rgba(255,255,255,0.2);
+      background:transparent;
+      border-radius:12px;
+      overflow:hidden;
+    }
+    input[type="color"]{ width:100%; height:100%; border:none; padding:0; background:transparent; }
+
+    .range{
+      flex:1; min-width:120px;
+      display:flex; align-items:center; gap:10px;
+      padding:0 12px;
+      border:1px solid rgba(255,255,255,0.2);
+      border-radius:12px;
+      background:rgba(255,255,255,0.06);
+    }
+    .range label{ font-size:12px; opacity:0.85; white-space:nowrap; }
+    input[type="range"]{ width:100%; }
+
+    .wrap{
+      flex:1;
+      padding:12px;
+      padding-bottom:calc(12px + env(safe-area-inset-bottom));
+      display:flex;
     }
 
-    .hint {
-      position: absolute;
-      left: 14px;
-      bottom: 12px;
-      font-size: 12px;
-      color: rgba(0,0,0,0.55);
-      background: rgba(255,255,255,0.75);
-      padding: 6px 10px;
-      border-radius: 999px;
-      user-select: none;
-      pointer-events: none;
+    .board{
+      flex:1;
+      background:#fff;
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow:0 10px 30px rgba(0,0,0,0.4);
+      border:1px solid rgba(255,255,255,0.08);
+      position:relative;
     }
+    canvas{ width:100%; height:100%; display:block; touch-action:none; }
+
+    .hint{
+      position:absolute; left:14px; bottom:12px;
+      font-size:12px;
+      color:rgba(0,0,0,0.55);
+      background:rgba(255,255,255,0.75);
+      padding:6px 10px;
+      border-radius:999px;
+      user-select:none;
+      pointer-events:none;
+    }
+
+    /* ===== "Time up" Effekt / Sperre ===== */
+    .lockOverlay{
+      position:absolute; inset:0;
+      display:flex; align-items:center; justify-content:center;
+      padding:24px;
+      background:rgba(0,0,0,0.55);
+      backdrop-filter: blur(6px);
+      opacity:0;
+      pointer-events:none;
+      transition: opacity 180ms ease;
+    }
+    .lockOverlay.show{
+      opacity:1;
+      pointer-events:auto; /* blockt Touch/Clicks auf Canvas */
+    }
+    .lockCard{
+      width:min(460px, 100%);
+      background:rgba(255,255,255,0.92);
+      color:#111;
+      border-radius:18px;
+      padding:18px 16px;
+      box-shadow:0 12px 40px rgba(0,0,0,0.35);
+      transform: translateY(8px) scale(0.98);
+      transition: transform 180ms ease;
+      text-align:center;
+    }
+    .lockOverlay.show .lockCard{
+      transform: translateY(0) scale(1);
+    }
+    .lockTitle{ font-weight:900; font-size:18px; margin:0 0 6px; }
+    .lockText{ margin:0; opacity:0.8; line-height:1.35; }
+
+    /* kleine Shake-Animation beim Ablaufen */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(6px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+    }
+    .shake { animation: shake 420ms ease; }
   </style>
 </head>
 
 <body>
+<div class="topbar">
+  <div class="timer" aria-label="Timer">
+    <span class="label">Timer</span>
+    <span class="value" id="timerValue">30s</span>
+  </div>
+  <button class="btn" id="timerReset">Fertig</button>
+</div>
+
 <div class="toolbar">
   <div class="color" title="Farbe wählen">
     <input id="color" type="color" value="#111111" aria-label="Farbe" />
@@ -129,9 +177,17 @@
 </div>
 
 <div class="wrap">
-  <div class="board">
+  <div class="board" id="board">
     <canvas id="canvas"></canvas>
+
     <div class="hint">Mit Finger zeichnen ✍️</div>
+
+    <!-- Overlay sperrt die Leinwand wenn Timer abläuft -->
+    <div class="lockOverlay" id="lockOverlay" aria-hidden="true">
+      <div class="lockCard">
+        <p class="lockTitle">⏰ Zeit abgelaufen</p>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -144,7 +200,78 @@
   const undoEl  = document.getElementById("undo");
   const clearEl = document.getElementById("clear");
 
-  // Wir speichern jeden "Zug" (Stroke) als Liste von Punkten + Settings
+  const boardEl = document.getElementById("board");
+  const lockOverlayEl = document.getElementById("lockOverlay");
+
+  // Timer Elements
+  const timerValueEl = document.getElementById("timerValue");
+  const timerResetEl = document.getElementById("timerReset");
+
+  // ===== Timer Logik =====
+  const TIMER_START_SECONDS = 30;
+  let remaining = TIMER_START_SECONDS;
+  let timerId = null;
+  let timerRunning = false;
+
+  // Sperre wenn Zeit abgelaufen
+  let locked = false;
+
+  function renderTimer() {
+    timerValueEl.textContent = `${remaining}s`;
+  }
+
+  function setLocked(isLocked) {
+    locked = isLocked;
+    lockOverlayEl.classList.toggle("show", locked);
+    lockOverlayEl.setAttribute("aria-hidden", locked ? "false" : "true");
+  }
+
+  function startTimerIfNeeded() {
+    if (timerRunning) return;
+    if (remaining <= 0) return;
+    if (locked) return;
+
+    timerRunning = true;
+    timerId = setInterval(() => {
+      remaining = Math.max(0, remaining - 1);
+      renderTimer();
+
+      if (remaining === 0) {
+        stopTimer();
+        // Effekt + sperren
+        boardEl.classList.remove("shake");
+        void boardEl.offsetWidth; // reflow, damit shake erneut triggert
+        boardEl.classList.add("shake");
+        setLocked(true);
+      }
+    }, 1000);
+  }
+
+  function stopTimer() {
+    if (timerId) clearInterval(timerId);
+    timerId = null;
+    timerRunning = false;
+  }
+
+  function hardClearCanvas() {
+    strokes.length = 0;
+    redraw();
+  }
+
+  function resetTimer() {
+    // Timer resetten + Leinwand freimachen + wieder freigeben
+    stopTimer();
+    remaining = TIMER_START_SECONDS;
+    renderTimer();
+    setLocked(false);
+    hardClearCanvas();
+  }
+
+  timerResetEl.addEventListener("click", resetTimer);
+  lockOverlayEl.addEventListener("click", resetTimer);
+  renderTimer();
+
+  // ===== Zeichnen (Strokes) =====
   /** @type {{color:string, size:number, points:{x:number,y:number}[]}[]} */
   const strokes = [];
   let currentStroke = null;
@@ -157,9 +284,7 @@
     canvas.width  = Math.round(rect.width * dpr);
     canvas.height = Math.round(rect.height * dpr);
 
-    // Koordinaten in CSS-Pixeln halten; wir skalieren die Zeichnung
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
     redraw();
   }
 
@@ -175,14 +300,21 @@
       clientY = e.clientY;
     }
 
-    return {
-      x: clientX - rect.left,
-      y: clientY - rect.top
-    };
+    return { x: clientX - rect.left, y: clientY - rect.top };
   }
 
   function startDraw(e) {
+    // Wenn gesperrt: gar nicht erst anfangen
+    if (locked) {
+      e.preventDefault();
+      return;
+    }
+
     e.preventDefault();
+
+    // Timer startet, sobald man anfängt zu zeichnen
+    startTimerIfNeeded();
+
     drawing = true;
 
     const p = getPointFromEvent(e);
@@ -193,12 +325,12 @@
     };
     strokes.push(currentStroke);
 
-    // Sofort ein Punkt (Tap) sichtbar machen
     drawStrokeSegment(currentStroke);
   }
 
   function moveDraw(e) {
     if (!drawing || !currentStroke) return;
+    if (locked) return;
     e.preventDefault();
 
     const p = getPointFromEvent(e);
@@ -224,7 +356,6 @@
     ctx.fillStyle = stroke.color;
     ctx.lineWidth = stroke.size;
 
-    // Wenn nur 1 Punkt: kleinen Kreis zeichnen
     if (n === 1) {
       const p = pts[0];
       ctx.beginPath();
@@ -233,7 +364,6 @@
       return;
     }
 
-    // Nur das letzte Segment zeichnen (performant)
     const p1 = pts[n - 2];
     const p2 = pts[n - 1];
 
@@ -244,13 +374,11 @@
   }
 
   function redraw() {
-    // Hintergrund weiß
     const rect = canvas.getBoundingClientRect();
     ctx.clearRect(0, 0, rect.width, rect.height);
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, rect.width, rect.height);
 
-    // Alle Strokes neu zeichnen
     for (const s of strokes) {
       const pts = s.points;
       if (pts.length === 0) continue;
@@ -271,24 +399,24 @@
 
       ctx.beginPath();
       ctx.moveTo(pts[0].x, pts[0].y);
-      for (let i = 1; i < pts.length; i++) {
-        ctx.lineTo(pts[i].x, pts[i].y);
-      }
+      for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
       ctx.stroke();
     }
   }
 
   undoEl.addEventListener("click", () => {
+    if (locked) return;
     strokes.pop();
     redraw();
   });
 
   clearEl.addEventListener("click", () => {
+    if (locked) return;
     strokes.length = 0;
     redraw();
   });
 
-  // Touch + Maus Events
+  // Touch + Maus
   canvas.addEventListener("touchstart", startDraw, { passive: false });
   canvas.addEventListener("touchmove",  moveDraw,  { passive: false });
   canvas.addEventListener("touchend",   endDraw,   { passive: false });
@@ -298,10 +426,7 @@
   window.addEventListener("mousemove", moveDraw);
   window.addEventListener("mouseup", endDraw);
 
-  // Resize handling
   window.addEventListener("resize", resizeCanvas);
-
-  // Initial
   resizeCanvas();
 </script>
 </body>
