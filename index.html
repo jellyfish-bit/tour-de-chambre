@@ -209,13 +209,15 @@
   const timerValueEl = document.getElementById("timerValue");
   const timerResetEl = document.getElementById("timerReset");
 
-  timerValueEl.textContent = `${TIMER_START_SECONDS}s`;
 
   // ===== Timer Logik =====
   const TIMER_START_SECONDS = 30;
   let remaining = TIMER_START_SECONDS;
   let timerId = null;
   let timerRunning = false;
+
+  timerValueEl.textContent = `${TIMER_START_SECONDS}s`;
+
 
   // Sperre wenn Zeit abgelaufen
   let locked = false;
